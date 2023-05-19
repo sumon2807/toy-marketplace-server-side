@@ -5,6 +5,9 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const app=express();
 const port=process.env.PORT || 5000;
 
+
+// const categories=require('./data/categories.json');
+
 // middleware
 app.use(cors());
 app.use(express.json());
@@ -27,7 +30,15 @@ async function run() {
     await client.connect();
 
     const toyCollection=client.db('toyDB').collection('toy');
+    const productCollection=client.db('toyDB').collection('products')
 
+// All Products Collection
+    app.get('/products', async(req,res)=>{
+      const cursor=productCollection.find();
+      const result= await cursor.toArray();
+      res.send(result)
+    })
+// my Toys Collection
     app.get('/toys', async(req, res)=>{
         const cursor=toyCollection.find();
         const result=await cursor.toArray();
