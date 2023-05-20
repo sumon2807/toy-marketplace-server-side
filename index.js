@@ -1,7 +1,7 @@
 const express = require('express');
 const cors=require('cors');
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app=express();
 const port=process.env.PORT || 5000;
 
@@ -30,7 +30,32 @@ async function run() {
     await client.connect();
 
     const toyCollection=client.db('toyDB').collection('toy');
-    const productCollection=client.db('toyDB').collection('products')
+    const productCollection=client.db('toyDB').collection('products');
+    const checkOutCollection=client.db('toyDB').collection('checkouts');
+
+    // checkOut product collection
+
+    app.get('/checkouts', async(req, res)=>{
+      let query={};
+      if(req.query?.email){
+        query={email: req.query.email}
+      }
+      const result= await checkOutCollection.find().toArray();
+      res.send(result)
+    })
+
+    app.post('/checkouts', async(req, res)=>{
+      const checkOut=req.body;
+      const result=await checkOutCollection.insertOne(checkOut);
+      res.send(result)
+    })
+
+    app.delete('/checkouts/:id', async(req, res)=>{
+      const id=req.params.id;
+      const query={_id: new ObjectId(id)};
+      const result= await checkOutCollection.deleteOne(query);
+      res.send(result)
+    })
 
 // All Products Collection
     app.get('/products', async(req,res)=>{
@@ -38,11 +63,29 @@ async function run() {
       const result= await cursor.toArray();
       res.send(result)
     })
+
+    app.get('/products/:id', async(req,res)=>{
+      const id =req.params.id;
+      const query={_id: new ObjectId(id)};
+      const result=await productCollection.findOne(query);
+      res.send(result)
+    } )
 // my Toys Collection
     app.get('/toys', async(req, res)=>{
         const cursor=toyCollection.find();
         const result=await cursor.toArray();
         res.send(result)
+    })
+
+    app.get('/toys/:id', async(req, res)=>{
+      const id=req.params.id;
+      const query={_id: new ObjectId(id)};
+      const options = {
+        // Include only the `title` and `imdb` fields in each returned document
+        projection: { title: 1, categoryId: 1 ,price: 1, photo:1, toyName:1, quantity:1 , detail: 1, toyName: 1, categoryId: 1},
+      };
+      const result= await toyCollection.findOne(query, options);
+      res.send(result)
     })
 
     app.post('/toys', async(req, res)=>{
