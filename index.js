@@ -50,6 +50,19 @@ async function run() {
       res.send(result)
     })
 
+    app.patch('/checkouts/:id', async(req, res)=>{
+      const updateBooking=req.body;
+      const id=req.params.id;
+      const filter={_id: new ObjectId(id)};
+      const updateDoc = {
+        $set: {
+          status: updateBooking.status
+        },
+      };
+     const result= await checkOutCollection.updateOne(filter, updateDoc);
+     res.send(result)
+    })
+
     app.delete('/checkouts/:id', async(req, res)=>{
       const id=req.params.id;
       const query={_id: new ObjectId(id)};
