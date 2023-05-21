@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.TM_USER}:${process.env.TM_PASS}@cluster0.xj518fd.mongodb.net/?retryWrites=true&w=majority`;
-console.log(uri);
+
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -32,6 +32,14 @@ async function run() {
     const toyCollection=client.db('toyDB').collection('toy');
     const productCollection=client.db('toyDB').collection('products');
     const checkOutCollection=client.db('toyDB').collection('checkouts');
+    const hotProductCollection=client.db('toyDB').collection('hotdeals');
+
+    // Hot Products collection
+    app.get('/hotdeals', async(req, res)=>{
+      const cursor=hotProductCollection.find();
+      const result= await cursor.toArray();
+      res.send(result)
+    })
 
     // checkOut product collection
 
@@ -95,7 +103,7 @@ async function run() {
       const query={_id: new ObjectId(id)};
       const options = {
         // Include only the `title` and `imdb` fields in each returned document
-        projection: { title: 1, categoryId: 1 ,price: 1, photo:1, toyName:1, quantity:1 , detail: 1, toyName: 1, categoryId: 1},
+        projection: { title: 1, categoryId: 1 ,price: 1, photo:1, toyName:1, quantity:1 , detail: 1, toyName: 1},
       };
       const result= await toyCollection.findOne(query, options);
       res.send(result)
