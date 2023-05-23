@@ -32,7 +32,7 @@ async function run() {
 
     const toyCollection = client.db('toyDB').collection('toy');
     const productCollection = client.db('toyDB').collection('products');
-    const checkOutCollection = client.db('toyDB').collection('checkouts');
+    // const checkOutCollection = client.db('toyDB').collection('checkouts');
     const hotProductCollection = client.db('toyDB').collection('hotdeals');
 
     // JWT
@@ -81,6 +81,13 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/toys/:id', async(req, res)=>{
+      const id =req.params.id;
+      const query={_id: new ObjectId(id)};
+      const result= await toyCollection.findOne(query);
+      res.send(result)
+    })
+
     app.get('/toys/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -101,29 +108,36 @@ async function run() {
       res.send(result)
     })
     // checkOut product collection
-    app.post('/checkouts', async (req, res) => {
-      const checkOut = req.body;
-      const result = await checkOutCollection.insertOne(checkOut);
-      res.send(result)
-    })
-    // All Patch methods
-    app.patch('/checkouts/:id', async (req, res) => {
-      const updateBooking = req.body;
+    // app.post('/checkouts', async (req, res) => {
+    //   const checkOut = req.body;
+    //   const result = await checkOutCollection.insertOne(checkOut);
+    //   res.send(result)
+    // })
+
+
+    // Put methods
+    app.put('/toys/:id', async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
-      const updateDoc = {
+      const options={upsert: true};
+      const updateDoc=req.body;
+      const update = {
         $set: {
-          status: updateBooking.status
+          toyName:updateDoc.toyName, 
+          price:updateDoc.price,
+          quantity:updateDoc.quantity,
+          detail: updateDoc.detail
         },
       };
-      const result = await checkOutCollection.updateOne(filter, updateDoc);
+      const result = await toyCollection.updateOne(filter, update, options);
       res.send(result)
     })
-    // All delete methods
-    app.delete('/checkouts/:id', async (req, res) => {
+
+    // delete methods
+    app.delete('/toys/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await checkOutCollection.deleteOne(query);
+      const result = await toyCollection.deleteOne(query);
       res.send(result)
     })
 
